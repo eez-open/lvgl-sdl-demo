@@ -28,6 +28,14 @@ static void event_handler_cb_main_watch(lv_event_t *e) {
     }
 }
 
+static void event_handler_cb_main_exit_btn(lv_event_t *e) {
+    lv_event_code_t event = lv_event_get_code(e);
+    void *flowState = e->user_data;
+    if (event == LV_EVENT_PRESSED) {
+        flowPropagateValue(flowState, 23, 0);
+    }
+}
+
 void create_screen_main() {
     void *flowState = getFlowState(0, 0);
     lv_obj_t *obj = lv_obj_create(0);
@@ -192,6 +200,27 @@ void create_screen_main() {
             lv_obj_add_flag(obj, LV_OBJ_FLAG_ADV_HITTEST);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
         }
+        {
+            // exit_btn
+            lv_obj_t *obj = lv_btn_create(parent_obj);
+            objects.exit_btn = obj;
+            lv_obj_set_pos(obj, 680, 311);
+            lv_obj_set_size(obj, 100, 50);
+            lv_obj_add_event_cb(obj, event_handler_cb_main_exit_btn, LV_EVENT_ALL, flowState);
+            lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+            {
+                lv_obj_t *parent_obj = obj;
+                {
+                    lv_obj_t *obj = lv_label_create(parent_obj);
+                    lv_obj_set_pos(obj, 0, 0);
+                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                    lv_label_set_text(obj, "Exit");
+                    lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_font(obj, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+                }
+            }
+        }
     }
 }
 
@@ -333,6 +362,7 @@ void tick_screen_main() {
             int32_t obj_logo_y_init_value;
             int32_t obj_web_site_x_init_value;
             int32_t obj_web_site_y_init_value;
+            int32_t obj_exit_btn_opacity_init_value;
         } anim_state = { -1 };
         
         if (anim_state.last_timeline_position == -1) {
@@ -349,6 +379,7 @@ void tick_screen_main() {
             anim_state.obj_logo_y_init_value = lv_obj_get_style_prop(objects.logo, LV_PART_MAIN, LV_STYLE_Y).num;
             anim_state.obj_web_site_x_init_value = lv_obj_get_style_prop(objects.web_site, LV_PART_MAIN, LV_STYLE_X).num;
             anim_state.obj_web_site_y_init_value = lv_obj_get_style_prop(objects.web_site, LV_PART_MAIN, LV_STYLE_Y).num;
+            anim_state.obj_exit_btn_opacity_init_value = lv_obj_get_style_prop(objects.exit_btn, LV_PART_MAIN, LV_STYLE_OPA).num / 255.0f;
         }
         
         if (timeline_position != anim_state.last_timeline_position) {
@@ -587,6 +618,38 @@ void tick_screen_main() {
                 
                 value.num = (int32_t)roundf(y_value);
                 lv_obj_set_local_style_prop(obj, LV_STYLE_Y, value, LV_PART_MAIN);
+            }
+            {
+                lv_obj_t *obj = objects.exit_btn;
+                
+                float opacity_value = anim_state.obj_exit_btn_opacity_init_value;
+                
+                while (1) {
+                    // keyframe #1
+                    if (timeline_position < 0) {
+                        break;
+                    }
+                    opacity_value = 0;
+                    
+                    // keyframe #2
+                    if (timeline_position < 1) {
+                        break;
+                    }
+                    if (timeline_position >= 1 && timeline_position < 2) {
+                        float t = (timeline_position - 1) / 1;
+                        // opacity
+                        opacity_value += eez_linear(t) * (1 - opacity_value);
+                        break;
+                    }
+                    opacity_value = 1;
+                    
+                    break;
+                }
+                
+                lv_style_value_t value;
+                
+                value.num = (int32_t)roundf(opacity_value * 255.0f);
+                lv_obj_set_local_style_prop(obj, LV_STYLE_OPA, value, LV_PART_MAIN);
             }
         }
         }

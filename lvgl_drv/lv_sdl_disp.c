@@ -39,7 +39,7 @@ void lv_port_disp_init(int width, int height)
 
     window = SDL_CreateWindow(WINDOW_NAME,
                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              DISPLAY_WIDTH, DISPLAY_HEIGHT, 0);
+                              DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 

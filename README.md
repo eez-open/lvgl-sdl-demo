@@ -6,7 +6,7 @@ apt install libsdl2-dev
 mkdir build
 cd build
 cmake ..
-cmake --build .
+make
 ./lvgl-sdl-demo
 ```
 
